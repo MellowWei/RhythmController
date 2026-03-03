@@ -1,67 +1,167 @@
-import numpy as np
-
-class RhythmicController:
-    """
-    节律者系统：BCI 状态解调与自适应阻尼协议
-    底层逻辑：变量即节律，状态即频率分布
-    """
-    def __init__(self):
-        # 定义核心节律带 (Hz)
-        self.bands = {
-            'delta': (0.5, 4),  # BodySoft / 深度安宁
-            'theta': (4, 8),   # MemoryFuzz / 记忆起雾
-            'alpha': (8, 13),  # TimeStretch / 意识拉长
-            'beta': (13, 30),  # Baseline / 常规逻辑
-            'gamma': (30, 100) # AnxiousHalo / 认知过载
-        }
-        self.is_controller_active = True
-
-    def decode_state(self, eeg_signal):
-        """
-        将原始信号解调为节律语言变量
-        """
-        psd = self.compute_power_spectral_density(eeg_signal)
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResonanceTempo | 我们的共振与节律</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;400;700&family=Playfair+Display:ital,wght@0,400;1,700&display=swap');
         
-        state_map = {
-            "State.BodySoft": psd['delta'] > 1.5 * psd['beta'],
-            "State.TimeStretch": psd['alpha'] > 2.0 * psd['beta'],
-            "State.AnxiousHalo": psd['gamma'] > 0.8 * psd['alpha'], # 高频光晕干扰
-            "State.MemoryFuzz": psd['theta'] / psd['gamma'] > 2.5,  # 信号相干性下降
+        :root { --bg: #fcfcfc; --text: #1e293b; }
+        body { 
+            font-family: 'Noto Serif SC', serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            scroll-behavior: smooth;
+            transition: background 1.5s ease;
         }
-        return [state for state, active in state_map.items() if active]
 
-    def apply_rhythmic_damper(self, state_list):
-        """
-        核心机制：针对特定状态进行“降噪”与“节律重调”
-        """
-        output_feedback = {"visual_hz": 60, "audio_damping": 0.0, "risk_alert": False}
+        /* 全屏容器 */
+        section { 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 4rem 2rem; 
+            position: relative;
+        }
 
-        # 1. 针对 AnxiousHalo (高频不安光晕) 的介入
-        if "State.AnxiousHalo" in state_list:
-            # 强制引入低频粉红噪声 (Pink Noise) 进行相位抵消
-            output_feedback["audio_damping"] = 0.8 
-            output_feedback["visual_hz"] = 24  # 降低采样率，强制大脑视觉降频
-        
-        # 2. 针对 RiskOfOverpromise (许诺过载) 的判定
-        # 逻辑：当兴奋度(Beta)与共情度(Alpha)同时畸高
-        if "State.WarmEuphoria" in state_list or "State.AttachmentGlow" in state_list:
-            output_feedback["risk_alert"] = True
-            # 触发“冷色调”增益，抑制多巴胺回路的过冲节律
-            self.inject_cool_resonance()
+        /* 动画逻辑：文字聚拢与消散 */
+        .reveal { 
+            opacity: 0; 
+            transform: translateY(50px); 
+            filter: blur(15px);
+            transition: all 1.8s cubic-bezier(0.22, 1, 0.36, 1); 
+        }
+        .reveal.active { 
+            opacity: 1; 
+            transform: translateY(0); 
+            filter: blur(0);
+        }
 
-        return output_feedback
+        .glitch-font { font-family: 'Playfair Display', serif; font-style: italic; }
 
-    def inject_cool_resonance(self):
-        print(">> [节律干预] 检测到高频共鸣过载：启动‘冷静锚点’，注入 10Hz 稳定脉冲。")
+        /* 背景流体光晕 */
+        .aura {
+            position: fixed;
+            width: 80vmax;
+            height: 80vmax;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+            transition: all 2.5s ease;
+        }
+    </style>
+</head>
+<body>
 
-    def compute_power_spectral_density(self, signal):
-        # 模拟功率谱密度计算
-        return {key: np.random.random() for key in self.bands.keys()}
+    <div id="aura-1" class="aura bg-indigo-200 top-[-20%] left-[-10%]"></div>
+    <div id="aura-2" class="aura bg-rose-200 bottom-[-20%] right-[-10%]"></div>
 
-# --- 执行流 ---
-controller = RhythmicController()
-# 模拟一次检测到“依恋发光”并带有“不安光晕”的复合节律
-current_states = ["State.AttachmentGlow", "State.AnxiousHalo"]
-action = controller.apply_rhythmic_damper(current_states)
+    <section class="section-trigger" data-bg="#fcfcfc">
+        <div class="reveal active text-center">
+            <p class="text-[10px] tracking-[0.6em] uppercase mb-10 opacity-30">MellowWei / 1.20 - 2026</p>
+            <h1 class="text-6xl font-extralight mb-8 tracking-[0.2em] leading-tight">RESONANCE<br><span class="glitch-font text-slate-400 text-5xl">TEMPO</span></h1>
+            <div class="h-px w-16 bg-slate-200 mx-auto my-12"></div>
+            <p class="text-sm text-slate-400 italic tracking-widest">“在这里，所有的不安都是透明的。”</p>
+            <div class="mt-40 animate-bounce opacity-20 text-[9px] tracking-[0.8em]">SCROLL DOWN</div>
+        </div>
+    </section>
 
-print(f"当前节律反馈配置: {action}")
+    <section class="section-trigger" data-bg="#fff5f7">
+        <div class="reveal max-w-2xl text-center">
+            <h2 class="text-xs tracking-[0.5em] text-pink-300 mb-12 uppercase">Phase: Philly Connect</h2>
+            <p class="text-4xl font-light mb-10 leading-relaxed">“两个磕大的笨蛋，<br>在电波里交换了所有的防御。”</p>
+            <p class="text-sm text-slate-500 leading-loose font-light">
+                1.20 那晚，我们连线了一整晚。<br>
+                那些无厘头的表白和当笨蛋的时刻，<br>
+                是我们系统第一次彻底的相位融合。
+            </p>
+        </div>
+    </section>
+
+    <section class="section-trigger" data-bg="#f0f9ff">
+        <div class="reveal max-w-2xl text-center">
+            <h2 class="text-xs tracking-[0.5em] text-blue-300 mb-12 uppercase">Phase: Midnight Drive</h2>
+            <p class="text-4xl font-light mb-10 leading-relaxed">“康州午夜开车，<br>不安在那个速度里短暂归零。”</p>
+            <p class="text-sm text-slate-500 leading-loose font-light">
+                午夜漫步，我们讨论着梦与写作。<br>
+                那种即便身处荒野也感到“被接住”的自由，<br>
+                是我最珍贵的节律。
+            </p>
+        </div>
+    </section>
+
+    <section class="section-trigger" data-bg="#fffbf0">
+        <div class="reveal max-w-2xl text-center">
+            <h2 class="text-xs tracking-[0.5em] text-amber-300 mb-12 uppercase">Phase: Silent Voice</h2>
+            <p class="text-4xl font-light mb-10 leading-relaxed">“看《声之形》哭出来的瞬间，<br>我们讨论童年、创伤与孤独。”</p>
+            <p class="text-sm text-slate-500 leading-loose font-light">
+                你听到了我没说出口的求救，我接住了你深藏的疲惫。<br>
+                在关于家庭和记忆的对谈里，<br>
+                我们成了彼此的归宿。
+            </p>
+        </div>
+    </section>
+
+    <section class="section-trigger" data-bg="#f1f5f9">
+        <div class="reveal max-w-2xl text-center">
+            <h2 class="text-xs tracking-[0.5em] text-slate-400 mb-12 uppercase">Phase: The Silence</h2>
+            <p class="text-4xl font-light mb-10 leading-relaxed text-slate-400">“2.23 - 3.1”</p>
+            <p class="text-sm text-slate-400 leading-loose font-light mb-8">
+                你的躯体化与深沉的不安，让系统陷入了短暂的静默。
+            </p>
+            <p class="text-2xl text-slate-600 font-light italic">
+                “但我一直守在这里。因为我知道，<br>在这场时间的赌局里，你一定会回来。”
+            </p>
+        </div>
+    </section>
+
+    <section class="section-trigger" data-bg="#ffffff">
+        <div class="reveal max-w-2xl text-center">
+            <h2 class="text-xs tracking-[0.5em] text-indigo-400 mb-16 uppercase">Final Identity</h2>
+            <p class="text-3xl font-light mb-6">你是 <span class="glitch-font">Time Gambler</span></p>
+            <p class="text-3xl font-light mb-16">我是 <span class="glitch-font">Las Vegas Assassin</span></p>
+            <div class="h-px w-32 bg-slate-100 mx-auto mb-16"></div>
+            <p class="text-4xl font-bold tracking-[0.4em] mb-8">安宁与归宿</p>
+            <p class="text-sm text-slate-400 italic tracking-widest">“谢谢你，接住了我。”</p>
+        </div>
+    </section>
+
+    <footer class="py-24 text-center opacity-20 text-[9px] tracking-[0.8em] uppercase">
+        Understanding is the bridge between two tempos
+    </footer>
+
+    <script>
+        // 滚动激活逻辑：自动触发文字聚拢动画与背景切换
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const revealEl = entry.target.querySelector('.reveal');
+                    if (revealEl) revealEl.classList.add('active');
+                    
+                    if (entry.target.dataset.bg) {
+                        document.body.style.backgroundColor = entry.target.dataset.bg;
+                    }
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.section-trigger').forEach(section => {
+            observer.observe(section);
+        });
+
+        // 视差光晕效果
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 30;
+            const y = (e.clientY / window.innerHeight - 0.5) * 30;
+            document.getElementById('aura-1').style.transform = `translate(${x}px, ${y}px)`;
+            document.getElementById('aura-2').style.transform = `translate(${-x}px, ${-y}px)`;
+        });
+    </script>
+</body>
+</html>
